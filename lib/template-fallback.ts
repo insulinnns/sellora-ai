@@ -27,7 +27,7 @@ export function buildTemplateFallbackCard(input: GenerateRequestInput): Generate
     `${productName} для ${audience}`,
     `${productName}: ${featureList[0] ?? category}`,
     `Товар категории «${category}» — ${productName}`,
-    `${productName} с ${featureList[0] ?? category}`,
+    `${productName} — ${category}: ${featureList[0] ?? "основные характеристики"}`,
     `${productName} и его характеристики: ${featureList.slice(0, 2).join(", ")}`,
     `${category} «${productName}»: ${featureList[0] ?? "основные характеристики"}`,
   ])];
