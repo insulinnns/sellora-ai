@@ -1,5 +1,24 @@
 import type { GenerateRequestInput } from "./schema";
 
+const TITLE_ANGLES = [
+  "начни с типа товара, затем укажи название или модель",
+  "начни с названия или модели, затем укажи тип товара",
+  "сделай акцент на сочетании подтверждённых характеристик",
+  "отрази сценарий использования, если он указан в данных",
+  "используй лаконичную каталожную структуру",
+];
+
+function shuffledTitleAngles(): string[] {
+  const angles = [...TITLE_ANGLES];
+
+  for (let index = angles.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [angles[index], angles[swapIndex]] = [angles[swapIndex], angles[index]];
+  }
+
+  return angles.slice(0, 3);
+}
+
 /**
  * Системная инструкция для Gemini: роль, правила и формат ответа.
  * Отделена от пользовательских данных, чтобы модель не путала
@@ -14,6 +33,7 @@ export function buildSystemInstruction(): string {
 - Никогда не придумывай: характеристики, сертификаты, гарантии, скидки, цены, результаты использования, медицинские свойства, официальные заявления бренда.
 - Если пользователь не указал конкретную характеристику, не утверждай её как факт и не додумывай её.
 - Стиль текста должен точно соответствовать выбранному пользователем тону и длине.
+- Три варианта названия должны отличаться структурой и углом подачи, а не только перестановкой слов.
 - Результат должен быть конкретным, естественным и готовым к публикации на маркетплейсе.
 - SEO-ключевые слова должны быть релевантны именно этому товару, без бессмысленного наполнения ключевиками.
 - Верни ОДИН валидный JSON-объект и ничего кроме него: без markdown-разметки, без пояснений, без code fence.
@@ -43,6 +63,11 @@ export function buildUserPrompt(input: GenerateRequestInput): string {
     `Тон текста: ${input.tone}`,
     `Желаемая длина текста: ${input.length}`,
   ];
+
+  const titleAngles = shuffledTitleAngles();
+  parts.push(
+    `Используй разные структуры для трёх названий:\n1. ${titleAngles[0]}\n2. ${titleAngles[1]}\n3. ${titleAngles[2]}`
+  );
 
   if (input.additionalInstructions && input.additionalInstructions.trim()) {
     parts.push(`Дополнительные пожелания: ${input.additionalInstructions.trim()}`);

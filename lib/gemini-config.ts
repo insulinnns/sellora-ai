@@ -5,6 +5,7 @@
 export const GEMINI_MODEL = "gemini-3.8-flash";
 
 export const GEMINI_FALLBACK_MODELS = ["gemini-3.7-flash", "gemini-3.6-flash"] as const;
+export const GEMINI_RETRY_DELAY_MS = 350;
 
 /**
  * Таймаут запроса к Gemini API, в миллисекундах.

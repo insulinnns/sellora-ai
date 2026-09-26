@@ -5,6 +5,7 @@ import { buildSystemInstruction, buildUserPrompt } from "@/lib/prompt";
 import {
   GEMINI_FALLBACK_MODELS,
   GEMINI_MODEL,
+  GEMINI_RETRY_DELAY_MS,
   GEMINI_TIMEOUT_MS,
   LIMITS,
 } from "@/lib/gemini-config";
@@ -95,26 +96,42 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
   try {
     rawText = "";
     for (const model of [GEMINI_MODEL, ...GEMINI_FALLBACK_MODELS]) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: [{ role: "user", parts: contentParts }] as any,
-          config: {
-            systemInstruction,
-            responseMimeType: "application/json",
-            temperature: 0.7,
-          },
-        });
-        rawText = response.text ?? "";
-        break;
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        const isUnavailable = message.includes("503") || message.toLowerCase().includes("unavailable");
-        if (!isUnavailable || model === GEMINI_FALLBACK_MODELS[GEMINI_FALLBACK_MODELS.length - 1]) {
-          throw error;
+      let retryPrimary = model === GEMINI_MODEL;
+
+      while (true) {
+        try {
+          const response = await ai.models.generateContent({
+            model,
+            contents: [{ role: "user", parts: contentParts }] as any,
+            config: {
+              systemInstruction,
+              responseMimeType: "application/json",
+              temperature: 0.9,
+            },
+          });
+          rawText = response.text ?? "";
+          break;
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          const isUnavailable = message.includes("503") || message.toLowerCase().includes("unavailable");
+          if (!isUnavailable) throw error;
+
+          if (retryPrimary) {
+            retryPrimary = false;
+            await new Promise((resolve) => setTimeout(resolve, GEMINI_RETRY_DELAY_MS));
+            continue;
+          }
+
+          if (model === GEMINI_FALLBACK_MODELS[GEMINI_FALLBACK_MODELS.length - 1]) {
+            throw error;
+          }
+
+          console.warn(`Gemini model ${model} unavailable; trying fallback model.`);
+          break;
         }
-        console.warn(`Gemini model ${model} unavailable; trying fallback model.`);
       }
+
+      if (rawText) break;
     }
 
     if (!rawText) {
