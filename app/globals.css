@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #08070f;
+  --bg-elevated: rgba(255, 255, 255, 0.045);
+  --text: #f3f1fa;
+  --text-muted: rgba(243, 241, 250, 0.62);
+  --border: rgba(255, 255, 255, 0.09);
+  --glow-violet: rgba(124, 92, 255, 0.35);
+  --glow-azure: rgba(63, 169, 245, 0.28);
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f5fb;
+  --bg-elevated: rgba(20, 16, 40, 0.04);
+  --text: #14101f;
+  --text-muted: rgba(20, 16, 31, 0.6);
+  --border: rgba(20, 16, 31, 0.09);
+  --glow-violet: rgba(124, 92, 255, 0.16);
+  --glow-azure: rgba(63, 169, 245, 0.14);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(600px circle at 10% 0%, var(--glow-violet), transparent 60%),
+    radial-gradient(500px circle at 90% 10%, var(--glow-azure), transparent 55%);
+}
+
+@layer components {
+  .surface {
+    background: var(--bg-elevated);
+    border-width: 1px;
+    border-color: var(--border);
+    border-style: solid;
+  }
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background: var(--glow-violet);
+  color: var(--text);
+}
+
+textarea,
+input,
+select {
+  background: transparent;
+  color: var(--text);
+}
+
+textarea::placeholder,
+input::placeholder {
+  color: var(--text-muted);
+}
