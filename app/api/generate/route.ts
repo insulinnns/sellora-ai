@@ -114,9 +114,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : String(error);
           const isUnavailable = message.includes("503") || message.toLowerCase().includes("unavailable");
-          if (!isUnavailable) throw error;
+          const isRateLimited = message.includes("429") || message.toLowerCase().includes("resource_exhausted");
+          if (!isUnavailable && !isRateLimited) throw error;
 
-          if (retryPrimary) {
+          if (isUnavailable && retryPrimary) {
             retryPrimary = false;
             await new Promise((resolve) => setTimeout(resolve, GEMINI_RETRY_DELAY_MS));
             continue;
@@ -126,7 +127,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
             throw error;
           }
 
-          console.warn(`Gemini model ${model} unavailable; trying fallback model.`);
+          const reason = isRateLimited ? "rate limited" : "unavailable";
+          console.warn(`Gemini model ${model} ${reason}; trying fallback model.`);
           break;
         }
       }
