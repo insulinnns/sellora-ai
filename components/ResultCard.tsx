@@ -36,6 +36,15 @@ export function ResultCard({ result, onReset }: ResultCardProps) {
     <section className="mx-auto max-w-2xl animate-rise px-5 pb-16">
       <h2 className="mb-5 text-xl font-semibold">Ваша карточка готова</h2>
 
+      {result.generationMode === "template" && (
+        <p
+          role="status"
+          className="surface mb-4 rounded-xl border border-[var(--border)] px-4 py-3 text-sm text-muted"
+        >
+          Gemini временно недоступен. Это шаблонный черновик, составленный только из введённых данных.
+        </p>
+      )}
+
       <div className="surface space-y-7 rounded-2xl p-5 sm:p-7">
         <a
           href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(result.titles[0])}`}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { generateRequestSchema, geminiResultSchema } from "@/lib/schema";
 import { buildSystemInstruction, buildUserPrompt } from "@/lib/prompt";
+import { buildTemplateFallbackCard } from "@/lib/template-fallback";
 import {
   GEMINI_FALLBACK_MODELS,
   GEMINI_MODEL,
@@ -149,6 +150,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
     const message = error instanceof Error ? error.message : String(error);
     const safeMessage = apiKey ? message.split(apiKey).join("[redacted]") : message;
     console.error("Gemini generation failed:", safeMessage.slice(0, 500));
+
+    if (
+      message.includes("429") ||
+      message.includes("503") ||
+      message.toLowerCase().includes("resource_exhausted") ||
+      message.toLowerCase().includes("unavailable")
+    ) {
+      return NextResponse.json({
+        success: true,
+        data: buildTemplateFallbackCard(input),
+      });
+    }
 
     if (message.toLowerCase().includes("rate") || message.includes("429")) {
       return fail("Превышен лимит запросов к Gemini. Подождите немного и попробуйте снова.", 429);

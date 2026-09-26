@@ -42,6 +42,7 @@ export interface GeneratedCard {
   benefits: string[];
   seoKeywords: string[];
   marketingText: string;
+  generationMode?: "ai" | "template";
 }
 
 export interface GenerateSuccessResponse {
