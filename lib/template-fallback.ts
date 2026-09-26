@@ -21,15 +21,25 @@ export function buildTemplateFallbackCard(input: GenerateRequestInput): Generate
     .split(/[,;\n]+/)
     .map((feature) => feature.replace(/[.]+$/g, "").trim())
     .filter(Boolean);
-  const titleOptions = shuffled([
+  const titleCandidates = [...new Set([
     `${productName} — ${category}`,
     `${category}: ${productName}`,
     `${productName} для ${audience}`,
-  ]);
+    `${productName}: ${featureList[0] ?? category}`,
+    `Товар категории «${category}» — ${productName}`,
+    `${productName} с ${featureList[0] ?? category}`,
+    `${productName} и его характеристики: ${featureList.slice(0, 2).join(", ")}`,
+    `${category} «${productName}»: ${featureList[0] ?? "основные характеристики"}`,
+  ])];
+  const shuffledTitles = shuffled(titleCandidates);
+  const previousTitles = new Set(input.previousTitles.map((title) => title.toLocaleLowerCase()));
+  const freshTitles = shuffledTitles.filter((title) => !previousTitles.has(title.toLocaleLowerCase()));
+  const titles = [...freshTitles, ...shuffledTitles.filter((title) => previousTitles.has(title.toLocaleLowerCase()))]
+    .slice(0, 3) as [string, string, string];
 
   return {
     generationMode: "template",
-    titles: [titleOptions[0], titleOptions[1], titleOptions[2]],
+    titles,
     shortDescription: `${productName} — товар категории «${category}». ${features}`,
     description: `${productName} относится к категории «${category}». В характеристиках указано: ${features}.\n\nКарточка предназначена для аудитории: ${audience}. Текст составлен только на основе введённых данных.`,
     benefits: featureList.slice(0, 6),

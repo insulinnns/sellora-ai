@@ -35,6 +35,7 @@ export default function HomePage() {
           tone: values.tone,
           length: values.length,
           additionalInstructions: values.additionalInstructions,
+          previousTitles: entries.slice(0, 5).map((entry) => entry.result.titles[0]),
           avoidUnverifiedClaims: values.avoidUnverifiedClaims,
           image:
             values.imageBase64 && values.imageMimeType

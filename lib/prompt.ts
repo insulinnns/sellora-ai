@@ -69,6 +69,12 @@ export function buildUserPrompt(input: GenerateRequestInput): string {
     `Используй разные структуры для трёх названий:\n1. ${titleAngles[0]}\n2. ${titleAngles[1]}\n3. ${titleAngles[2]}`
   );
 
+  if (input.previousTitles.length > 0) {
+    parts.push(
+      `Не повторяй дословно эти первые заголовки из недавних карточек: ${input.previousTitles.join(" | ")}`
+    );
+  }
+
   if (input.additionalInstructions && input.additionalInstructions.trim()) {
     parts.push(`Дополнительные пожелания: ${input.additionalInstructions.trim()}`);
   }

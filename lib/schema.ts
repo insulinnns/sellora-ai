@@ -26,6 +26,11 @@ export const generateRequestSchema = z.object({
     .max(LIMITS.additionalInstructions.max, "Пожелания слишком длинные.")
     .optional()
     .default(""),
+  previousTitles: z
+    .array(z.string().trim().max(LIMITS.productName.max))
+    .max(5)
+    .optional()
+    .default([]),
   avoidUnverifiedClaims: z.boolean().default(true),
   image: z
     .object({

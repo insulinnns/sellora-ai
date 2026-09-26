@@ -28,6 +28,7 @@ export interface GenerateRequestBody {
   tone: string;
   length: string;
   additionalInstructions: string;
+  previousTitles?: string[];
   avoidUnverifiedClaims: boolean;
   image?: {
     data: string;
