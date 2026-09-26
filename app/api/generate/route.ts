@@ -78,7 +78,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateR
 
   // Части типизированы как `any`, так как точная форма Part зависит от версии
   // SDK @google/genai; структура соответствует официальному формату Gemini API.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const contentParts: any[] = [{ text: userPrompt }];
   if (input.image) {
     contentParts.push({
